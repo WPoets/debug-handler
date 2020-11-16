@@ -5,8 +5,7 @@ function setup(){
 	$debugbar=\aw2_library::get('debugbar.instance');
 	if(!empty($debugbar))return $debugbar;
 	
-	$plugin_path=\aw2_library::$plugin_path;
-	require_once $plugin_path .'/vendor/autoload.php';
+	require_once AWESOME_PATH.'/vendor/autoload.php';
 	//use DebugBar\StandardDebugBar;
 	$debugbar = new StandardDebugBar();
 	\aw2_library::set('debugbar.instance',$debugbar);
