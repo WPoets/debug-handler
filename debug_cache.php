@@ -52,6 +52,34 @@ function set_access_module($atts,$content=null,$shortcode=null){
 }
 
 
+\aw2_library::add_service('debug_cache.set_access_app','Set the Debug Cache',['namespace'=>__NAMESPACE__]);
+
+function set_access_app($atts,$content=null,$shortcode=null){
+	if(\aw2_library::pre_actions('all',$atts,$content)==false)return;
+	
+	extract(\aw2_library::shortcode_atts( array(
+	'app'=>null,
+	'fields'=>array()
+	), $atts) );
+	
+	if(!$app)return 'App slug is missing';	
+	if(empty($fields))return 'Missing fields data';	
+	
+	$redis = \aw2_library::redis_connect(REDIS_DATABASE_DEBUG_CACHE);
+	
+	$key = 'app:'.$app;
+	
+	foreach($fields as $k=>$value){
+		$redis->hset($key, $k,$value);
+	}
+	$redis->hIncrBy($key, 'cnt', 1);
+	if(defined('SET_ENV_CACHE') && SET_ENV_CACHE)$redis->hIncrBy($key, 'cache_cnt', 1);
+	
+	return;
+}
+
+
+
 \aw2_library::add_service('debug_cache.getkeys','Get the Debug Cache',['namespace'=>__NAMESPACE__]);
 function getkeys($atts,$content=null,$shortcode=null){
 	if(\aw2_library::pre_actions('all',$atts,$content)==false)return;
