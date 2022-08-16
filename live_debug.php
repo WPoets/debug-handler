@@ -142,7 +142,8 @@ function publish_event($atts=null,$content=null,$shortcode=null){
 	
 	extract(\aw2_library::shortcode_atts( array(
 	'event'=>'',
-	'bgcolor'=>''
+	'bgcolor'=>'',
+	'format'=>array()
 	), $atts, '' ) );
 	
 	
@@ -150,7 +151,12 @@ function publish_event($atts=null,$content=null,$shortcode=null){
 	$action = (isset($event['action'])?$event['action']:'');
 	$event_title= $flow.':'.$action;
 	
-	$event['bg_color'] = $bgcolor;
+	$event['bg_color'] =$bgcolor;
+	
+	if(isset($format['bgcolor']))
+		$event['bg_color'] = $format['bgcolor'];
+	
+	
 	
 	event_set(['event_title'=>$event_title,'message'=>$event]);
 	
@@ -207,9 +213,7 @@ function output_decide($atts=null,$content=null,$shortcode=null){
 		}
 	
 		if($match===true){
-
 			output_items($item);
-			break;
 		}	
 	}
 }
@@ -364,7 +368,11 @@ function dump($atts=null,$content=null,$shortcode=null){
 	if($atts['event']==='yes'){
 		$msg .= '<em>#all</em>'.\util::var_dump(\aw2_library::get('@live_debug.event'),true);
 	}
-	
+
+	if($atts['live_debug']==='yes'){
+		$msg .= '<em>#live_debug</em>'.\util::var_dump(\aw2_library::get('@live_debug'),true);
+	}
+		
 	
 	echo "<template class='awesome_live_debug_data'> <div style='padding:10px;margin-bottom:5px;background-color:".$bg_color."'>".$msg."</div></template>";
 	
@@ -376,6 +384,32 @@ function dump($atts=null,$content=null,$shortcode=null){
 	}	
 }
 
+
+\aw2_library::add_service('live_debug.output.collect','publish event on the screen',['namespace'=>__NAMESPACE__]);
+function collect($atts=null,$content=null,$shortcode=null){
+
+	if(!\aw2\live_debug\is_active()) return;		
+	if(!\aw2\live_debug\publish_is_active()) return;	
+
+	$arr=array();			
+	
+	if(isset($atts['event_keys'])){	
+		foreach($atts['event_keys'] as $key){	
+			$arr[$key]= \aw2_library::get('@live_debug.event.' . $key);
+		}
+	}
+	
+	if($atts['event']==='yes'){
+		$arr['event']= \aw2_library::get('@live_debug.event');
+	}
+
+	if($atts['live_debug']==='yes'){
+		$arr['live_debug']= \aw2_library::get('@live_debug');
+	}
+		
+	$id=isset($atts['collect_id'])?$atts['collect_id']:'collect';
+	\aw2_library::set('@live_debug.' . $id . '.new' ,$arr);
+}
 
 /*
 
