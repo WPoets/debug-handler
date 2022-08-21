@@ -193,7 +193,7 @@ function output_decide($atts=null,$content=null,$shortcode=null){
 
 		if(isset($item['checks'])){
 			foreach($item['checks'] as $check){
-				 $rhs = $check['value'];	
+				$rhs = \aw2_library::safe_explode(',',$check['value']);		
 				
 				if(isset($check['event_key']))
 					$lhs=\aw2_library::get('@live_debug.event.' . $check['event_key']);
@@ -205,7 +205,7 @@ function output_decide($atts=null,$content=null,$shortcode=null){
 					$lhs=\aw2_library::get($check['env_key']);
 
 				
-				if($lhs!==$rhs){
+				if(!in_array($lhs,$rhs)){
 					$match=false;	
 					break; // this is loop for "and" so if any condtion fails, exit the loop
 				}
@@ -232,7 +232,7 @@ function publish_decide($atts=null,$content=null,$shortcode=null){
 		$match=true;
 
 		foreach($item['checks'] as $check){
-			 $rhs = $check['value'];	
+			$rhs = \aw2_library::safe_explode(',',$check['value']);	
 			
 			if(isset($check['event_key']))
 				$lhs=\aw2_library::get('@live_debug.event.' . $check['event_key']);
@@ -244,7 +244,7 @@ function publish_decide($atts=null,$content=null,$shortcode=null){
 				$lhs=\aw2_library::get($check['env_key']);
 
 			
-			if($lhs!==$rhs){
+			if(!in_array($lhs,$rhs)){
 				$match=false;	
 				break; // this is loop for "and" so if any condtion fails, exit the loop
 			}
