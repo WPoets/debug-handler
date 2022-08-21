@@ -68,7 +68,7 @@ function setup($atts=null,$content=null,$shortcode=null){
 }
 
 
-\aw2_library::add_service('live_debug.start.add','Start when condition is met',['func'=>'start_add','namespace'=>__NAMESPACE__]);
+\aw2_library::add_service('live_debug.start.add','Start publishing when condition is met',['func'=>'start_add','namespace'=>__NAMESPACE__]);
 function start_add($atts=null,$content=null,$shortcode=null){
 	if(active()!=='yes') return;		
 	
@@ -87,7 +87,7 @@ function start_add($atts=null,$content=null,$shortcode=null){
 	
 }
 
-\aw2_library::add_service('live_debug.code.add','Stop Publishing Events',['func'=>'code_add','namespace'=>__NAMESPACE__]);
+\aw2_library::add_service('live_debug.code.add','This code is executed while checking for Publishing Events',['func'=>'code_add','namespace'=>__NAMESPACE__]);
 function code_add($atts=null,$content=null,$shortcode=null){
 	if(active()!=='yes') return;		
 	
@@ -170,7 +170,7 @@ function publish_event($atts=null,$content=null,$shortcode=null){
 
 }
 
-\aw2_library::add_service('live_debug.output.decide','Stop Publishing Events',['func'=>'output_decide','namespace'=>__NAMESPACE__]);
+\aw2_library::add_service('live_debug.output.decide','Decide to output the published events',['func'=>'output_decide','namespace'=>__NAMESPACE__]);
 function output_decide($atts=null,$content=null,$shortcode=null){
 	if(!is_active()) return;		
 
@@ -219,7 +219,7 @@ function output_decide($atts=null,$content=null,$shortcode=null){
 }
 
 
-\aw2_library::add_service('live_debug.publish.decide','Stop Publishing Events',['func'=>'publish_decide','namespace'=>__NAMESPACE__]);
+\aw2_library::add_service('live_debug.publish.decide','Decide to publish the events',['func'=>'publish_decide','namespace'=>__NAMESPACE__]);
 function publish_decide($atts=null,$content=null,$shortcode=null){
 	if(!is_active()) return;		
 	
@@ -295,7 +295,7 @@ function output_items($atts){
 
 }
 
-\aw2_library::add_service('live_debug.event.set','Stop Publishing Events',['func'=>'event_set','namespace'=>__NAMESPACE__]);
+\aw2_library::add_service('live_debug.event.set','Set the published event in the @live_debug',['func'=>'event_set','namespace'=>__NAMESPACE__]);
 function event_set($atts=null,$content=null,$shortcode=null){
 	if(!is_active()) return;		
 	
@@ -328,7 +328,7 @@ function output_add($atts=null,$content=null,$shortcode=null){
 	\aw2_library::set('@live_debug.output.conditions.new',$arr);
 }
 
-\aw2_library::add_service('live_debug.output.code','Stop Publishing Events',['func'=>'output_code','namespace'=>__NAMESPACE__]);
+\aw2_library::add_service('live_debug.output.code','hanndle the output directly',['func'=>'output_code','namespace'=>__NAMESPACE__]);
 function output_code($atts=null,$content=null,$shortcode=null){
 	if(!is_active()) return;
 	
@@ -393,7 +393,7 @@ function dump($atts=null,$content=null,$shortcode=null){
 }
 
 
-\aw2_library::add_service('live_debug.output.collect','publish event on the screen',['namespace'=>__NAMESPACE__]);
+\aw2_library::add_service('live_debug.output.collect','collect the events to collect_id',['namespace'=>__NAMESPACE__]);
 function collect($atts=null,$content=null,$shortcode=null){
 	extract(\aw2_library::shortcode_atts( array(
 		'event_keys'=>'',
