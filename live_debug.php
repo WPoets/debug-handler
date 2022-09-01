@@ -321,6 +321,9 @@ function output_add($atts=null,$content=null,$shortcode=null){
 	$arr['output']=array_map(function($item){
 			if(isset($item['event_keys']))
 				$item['event_keys'] = explode(',',$item['event_keys']);
+			
+			if(isset($item['env_keys']))
+				$item['env_keys'] = explode(',',$item['env_keys']);
 
 			return $item;
 	 },$arr['output']);
@@ -341,6 +344,7 @@ namespace aw2\debug_output;
 function dump($atts=null,$content=null,$shortcode=null){
 	extract(\aw2_library::shortcode_atts( array(
 	'event_keys'=>'',
+	'env_keys'=>'',
 	'event'=>'',
 	'live_debug'=>'',
 	'env_dump'=>'',
@@ -370,6 +374,12 @@ function dump($atts=null,$content=null,$shortcode=null){
 	if(!empty($event_keys)){	
 		foreach($atts['event_keys'] as $key){	
 			$msg .= '<em>'.$key .'</em>'.\util::var_dump(\aw2_library::get('@live_debug.event.' . $key),true);
+		}
+	}
+	
+	if(!empty($env_keys)){	
+		foreach($atts['env_keys'] as $key){	
+			$msg .= '<em>'.$key .'</em>'.\util::var_dump(\aw2_library::get($key),true);
 		}
 	}
 	
@@ -408,6 +418,12 @@ function collect($atts=null,$content=null,$shortcode=null){
 	$arr=array();			
 	
 	if(!empty($event_keys)){	
+		foreach($event_keys as $key){	
+			$arr[$key]= \aw2_library::get('@live_debug.event.' . $key);
+		}
+	}
+	
+	if(!empty($env_keys)){	
 		foreach($event_keys as $key){	
 			$arr[$key]= \aw2_library::get('@live_debug.event.' . $key);
 		}
