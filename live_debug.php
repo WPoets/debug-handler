@@ -407,6 +407,7 @@ function dump($atts=null,$content=null,$shortcode=null){
 function collect($atts=null,$content=null,$shortcode=null){
 	extract(\aw2_library::shortcode_atts( array(
 		'event_keys'=>'',
+		'env_keys'=>'',
 		'event'=>'',
 		'live_debug'=>'',
 		'collect_id'=>'collect'
@@ -424,8 +425,8 @@ function collect($atts=null,$content=null,$shortcode=null){
 	}
 	
 	if(!empty($env_keys)){	
-		foreach($event_keys as $key){	
-			$arr[$key]= \aw2_library::get('@live_debug.event.' . $key);
+		foreach($env_keys as $key){	
+			$arr[$key]= \aw2_library::get($key);
 		}
 	}
 	
