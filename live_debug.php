@@ -107,6 +107,18 @@ function publish_start($atts=null,$content=null,$shortcode=null){
 	$status = \aw2_library::get('@live_debug.is_publishing');
 	if($status==='yes')return;	
 	
+	//check if controller is JS or CSS in that case do not debug
+	//get url and check for /js/ or /css/ in that case do not 
+	//$request_uri = $_SERVER["REQUEST_URI"];
+	
+	$exclude_path = array('/js/','/css/','/fileviewer/','/file/');
+	
+	foreach($exclude_path as $path){
+		if(strpos($_SERVER["REQUEST_URI"], $path) !== false){
+			return;
+		}	
+	}
+	
 	\aw2_library::set('@live_debug.is_publishing',"yes");
 	
 	include_once "lib/debug_icon.php";
@@ -185,7 +197,7 @@ function output_decide($atts=null,$content=null,$shortcode=null){
 	
 	$starts = \aw2_library::get('@live_debug.output.conditions');
 
-	
+	if(!is_array($starts)) return;
 	
 	foreach($starts as $item){
 
@@ -362,12 +374,12 @@ function dump($atts=null,$content=null,$shortcode=null){
 	$active_event = \aw2_library::get('@live_debug.event_title');
 
 	$msg='<h3>' . $active_event .
-	'<br><small> app:<em>' . \aw2_library::get('app.slug') .'</em>' .
-	' post_type:<em>' . \aw2_library::get('module.collection.post_type').'</em>' .
-	' module:<em>' . \aw2_library::get('module.slug') .'</em>'.
-	' tpl:<em>' . \aw2_library::get('template.name').'</em>' .
-	' svc:<em>' . \aw2_library::get('module.collection.service_id') .'</em>'.
-	' conn:<em>' . \aw2_library::get('module.collection.connection').'</em>' .
+	'<br><small><strong>app:</strong><em>' . \aw2_library::get('app.slug') .'</em>' .
+	' <strong>post_type:</strong><em>' . \aw2_library::get('module.collection.post_type').'</em>' .
+	' <strong>module:</strong><em>' . \aw2_library::get('module.slug') .'</em>'.
+	' <strong>tpl:</strong><em>' . \aw2_library::get('template.name').'</em>' .
+	' <strong>service:</strong><em>' . \aw2_library::get('module.collection.service_id') .'</em>'.
+	' <strong>conn:</strong><em>' . \aw2_library::get('module.collection.connection').'</em>' .
 	'</small></h3>' ;
 	//<event> (App:<> pt:<> m:<> t:<> svc:<>    conn:<>)
 	
@@ -439,4 +451,59 @@ function collect($atts=null,$content=null,$shortcode=null){
 	}
 	
 	\aw2_library::set('@live_debug.' . $collect_id . '.new' ,$arr);
+}
+
+
+\aw2_library::add_service('live_debug.output.ticket_collect','collect the events to collect_id',['namespace'=>__NAMESPACE__]);
+function ticket_collect($atts=null,$content=null,$shortcode=null){
+	if(!isset($_COOKIE['live_debug'])) return; 
+	$ticket_id = 'debug_collect:'.$_COOKIE['live_debug'];
+		
+	extract(\aw2_library::shortcode_atts( array(
+		'event_keys'=>'',
+		'env_keys'=>'',
+		'event'=>'',
+		'live_debug'=>'',
+		'collect_id'=>'collect'
+		), $atts, '' ) );
+
+	if(!\aw2\live_debug\is_active()) return;		
+	if(!\aw2\live_debug\publish_is_active()) return;	
+
+	$arr=array();			
+	
+	$active_event = \aw2_library::get('@live_debug.event_title');
+	
+	$arr['event_title']=$active_event;
+	$arr['bg_color']= \aw2_library::get('@live_debug.event.bg_color');
+	$arr['extra_info']='<small> app:<em>' . \aw2_library::get('app.slug') .'</em>' .
+	' post_type:<em>' . \aw2_library::get('module.collection.post_type').'</em>' .
+	' module:<em>' . \aw2_library::get('module.slug') .'</em>'.
+	' tpl:<em>' . \aw2_library::get('template.name').'</em>' .
+	' service:<em>' . \aw2_library::get('module.collection.service_id') .'</em>'.
+	' conn:<em>' . \aw2_library::get('module.collection.connection').'</em>' .
+	'</small>' ;
+	
+	if(!empty($event_keys)){	
+		foreach($event_keys as $key){	
+			$arr[$key]= \aw2_library::get('@live_debug.event.' . $key);
+		}
+	}
+	
+	if(!empty($env_keys)){	
+		foreach($env_keys as $key){	
+			$arr[$key]= \aw2_library::get($key);
+		}
+	}
+	
+	if($event==='yes'){
+		$arr['event']= \aw2_library::get('@live_debug.event');
+	}
+
+	if($live_debug==='yes'){
+		$arr['live_debug']= \aw2_library::get('@live_debug');
+	}
+	
+	\aw2\session_cache\hset(['main'=>$ticket_id,'ttl'=>'60','field'=>$active_event,'value'=>json_encode($arr)],null,null);
+	
 }
