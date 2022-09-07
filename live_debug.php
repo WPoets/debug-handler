@@ -60,6 +60,7 @@ function setup($atts=null,$content=null,$shortcode=null){
 		"event"=>array(),
 		"output"=>array(),
 		"is_publishing"=>"no",
+		"collection_reset"=>"no",
 		"left_events"=>"500"
 	));
 	\aw2_library::parse_shortcode($content);
@@ -120,8 +121,6 @@ function publish_start($atts=null,$content=null,$shortcode=null){
 	}
 	
 	\aw2_library::set('@live_debug.is_publishing',"yes");
-	
-	include_once "lib/debug_icon.php";
 
 }
 
@@ -366,6 +365,13 @@ function dump($atts=null,$content=null,$shortcode=null){
 	
 	if(!\aw2\live_debug\is_active()) return;		
 	if(!\aw2\live_debug\publish_is_active()) return;	
+	
+	if(\aw2_library::get('@live_debug.debug_icon') !== 'yes'){
+		include_once "lib/debug_icon.php";
+		\aw2_library::set('@live_debug.debug_icon','yes');
+	 }
+	
+	
 		
 	$bg_color = \aw2_library::get('@live_debug.event.bg_color');	
 
@@ -381,7 +387,7 @@ function dump($atts=null,$content=null,$shortcode=null){
 	' <strong>service:</strong><em>' . \aw2_library::get('module.collection.service_id') .'</em>'.
 	' <strong>conn:</strong><em>' . \aw2_library::get('module.collection.connection').'</em>' .
 	'</small></h3>' ;
-	//<event> (App:<> pt:<> m:<> t:<> svc:<>    conn:<>)
+
 	
 	if(!empty($event_keys)){	
 		foreach($atts['event_keys'] as $key){	
@@ -414,74 +420,52 @@ function dump($atts=null,$content=null,$shortcode=null){
 	}	
 }
 
-
 \aw2_library::add_service('live_debug.output.collect','collect the events to collect_id',['namespace'=>__NAMESPACE__]);
 function collect($atts=null,$content=null,$shortcode=null){
-	extract(\aw2_library::shortcode_atts( array(
-		'event_keys'=>'',
-		'env_keys'=>'',
-		'event'=>'',
-		'live_debug'=>'',
-		'collect_id'=>'collect'
-		), $atts, '' ) );
-
-	if(!\aw2\live_debug\is_active()) return;		
-	if(!\aw2\live_debug\publish_is_active()) return;	
-
-	$arr=array();			
-	
-	if(!empty($event_keys)){	
-		foreach($event_keys as $key){	
-			$arr[$key]= \aw2_library::get('@live_debug.event.' . $key);
-		}
-	}
-	
-	if(!empty($env_keys)){	
-		foreach($env_keys as $key){	
-			$arr[$key]= \aw2_library::get($key);
-		}
-	}
-	
-	if($event==='yes'){
-		$arr['event']= \aw2_library::get('@live_debug.event');
-	}
-
-	if($live_debug==='yes'){
-		$arr['live_debug']= \aw2_library::get('@live_debug');
-	}
-	
-	\aw2_library::set('@live_debug.' . $collect_id . '.new' ,$arr);
-}
-
-
-\aw2_library::add_service('live_debug.output.ticket_collect','collect the events to collect_id',['namespace'=>__NAMESPACE__]);
-function ticket_collect($atts=null,$content=null,$shortcode=null){
 	if(!isset($_COOKIE['live_debug'])) return; 
-	$ticket_id = 'debug_collect:'.$_COOKIE['live_debug'];
+	
 		
 	extract(\aw2_library::shortcode_atts( array(
 		'event_keys'=>'',
 		'env_keys'=>'',
+		'preserve'=>'no',
+		'max_events'=>500,
 		'event'=>'',
 		'live_debug'=>'',
-		'collect_id'=>'collect'
+		'collect_id'=>$_COOKIE['live_debug']
 		), $atts, '' ) );
 
 	if(!\aw2\live_debug\is_active()) return;		
 	if(!\aw2\live_debug\publish_is_active()) return;	
 
+	$ticket_id = 'debug_collect:'.$collect_id;
+	
+	 if(\aw2_library::get('@live_debug.collection_reset') === 'no'){
+		//reset the redis cache 
+		if($preserve==='no') 
+			\aw2\session_cache\del(['main'=>$ticket_id],null,null);
+		
+		//and set it to yes
+		\aw2_library::set('@live_debug.collection_reset','yes');
+	 }
+	
+	$count = \aw2\session_cache\hlen(['main'=>$ticket_id],null,null);
+	if($count >= $max_events) return;
+	$count++; //to be used as hashfield key
+	
+	
 	$arr=array();			
 	
 	$active_event = \aw2_library::get('@live_debug.event_title');
 	
 	$arr['event_title']=$active_event;
 	$arr['bg_color']= \aw2_library::get('@live_debug.event.bg_color');
-	$arr['extra_info']='<small> app:<em>' . \aw2_library::get('app.slug') .'</em>' .
-	' post_type:<em>' . \aw2_library::get('module.collection.post_type').'</em>' .
-	' module:<em>' . \aw2_library::get('module.slug') .'</em>'.
-	' tpl:<em>' . \aw2_library::get('template.name').'</em>' .
-	' service:<em>' . \aw2_library::get('module.collection.service_id') .'</em>'.
-	' conn:<em>' . \aw2_library::get('module.collection.connection').'</em>' .
+	$arr['extra_info']='<small><strong>app:</strong><em>' . \aw2_library::get('app.slug') .'</em>' .
+	' <strong>post_type:</strong><em>' . \aw2_library::get('module.collection.post_type').'</em>' .
+	' <strong>module:</strong><em>' . \aw2_library::get('module.slug') .'</em>'.
+	' <strong>tpl:</strong><em>' . \aw2_library::get('template.name').'</em>' .
+	' <strong>service:</strong><em>' . \aw2_library::get('module.collection.service_id') .'</em>'.
+	' <strong>conn:</strong><em>' . \aw2_library::get('module.collection.connection').'</em>' .
 	'</small>' ;
 	
 	if(!empty($event_keys)){	
@@ -504,6 +488,6 @@ function ticket_collect($atts=null,$content=null,$shortcode=null){
 		$arr['live_debug']= \aw2_library::get('@live_debug');
 	}
 	
-	\aw2\session_cache\hset(['main'=>$ticket_id,'ttl'=>'60','field'=>$active_event,'value'=>json_encode($arr)],null,null);
+	\aw2\session_cache\hset(['main'=>$ticket_id,'ttl'=>'60','field'=>$count,'value'=>json_encode($arr)],null,null);
 	
 }
