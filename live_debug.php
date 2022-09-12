@@ -440,13 +440,13 @@ function collect($atts=null,$content=null,$shortcode=null){
 
 	$ticket_id = 'debug_collect:'.$collect_id;
 	
-	 if(\aw2_library::get('@live_debug.collection_reset') === 'no'){
+	if(\aw2_library::get('@live_debug.'.$collect_id.'.collection_reset') !== 'yes'){
 		//reset the redis cache 
-		if($preserve==='no') 
+		if($preserve === 'no') 
 			\aw2\session_cache\del(['main'=>$ticket_id],null,null);
 		
 		//and set it to yes
-		\aw2_library::set('@live_debug.collection_reset','yes');
+		\aw2_library::set('@live_debug.'.$collect_id.'.collection_reset','yes');
 	 }
 	
 	$count = \aw2\session_cache\hlen(['main'=>$ticket_id],null,null);
