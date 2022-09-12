@@ -285,6 +285,12 @@ function output_items($atts){
 	'output'=>array()
 	), $atts, '' ) );
 
+	//if app is debugger - skip the output
+	if(\aw2_library::get('app.slug') === 'debugger') return;
+	if(strpos($_SERVER["REQUEST_URI"], '/debugger/') !== false){
+		return;
+	}	
+	
 	//after everything is verified reduce the event
 	$left_events = \aw2_library::get('@live_debug.left_events');
 	if($left_events <= 0) return;
@@ -440,7 +446,7 @@ function collect($atts=null,$content=null,$shortcode=null){
 
 	$ticket_id = 'debug_collect:'.$collect_id;
 	
-	if(\aw2_library::get('@live_debug.'.$collect_id.'.collection_reset') !== 'yes'){
+	 if(\aw2_library::get('@live_debug.'.$collect_id.'.collection_reset') !== 'yes'){
 		//reset the redis cache 
 		if($preserve === 'no') 
 			\aw2\session_cache\del(['main'=>$ticket_id],null,null);
@@ -470,13 +476,13 @@ function collect($atts=null,$content=null,$shortcode=null){
 	
 	if(!empty($event_keys)){	
 		foreach($event_keys as $key){	
-			$arr[$key]= \aw2_library::get('@live_debug.event.' . $key);
+			$arr['event_keys'][$key]= \aw2_library::get('@live_debug.event.' . $key);
 		}
 	}
 	
 	if(!empty($env_keys)){	
 		foreach($env_keys as $key){	
-			$arr[$key]= \aw2_library::get($key);
+			$arr['env_keys'][$key]= \aw2_library::get($key);
 		}
 	}
 	
