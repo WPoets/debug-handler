@@ -454,7 +454,7 @@ function collect($atts=null,$content=null,$shortcode=null){
 		//and set it to yes
 		\aw2_library::set('@live_debug.'.$collect_id.'.collection_reset','yes');
 	 }
-	
+
 	$count = \aw2\session_cache\hlen(['main'=>$ticket_id],null,null);
 	if($count >= $max_events) return;
 	$count++; //to be used as hashfield key
@@ -473,6 +473,7 @@ function collect($atts=null,$content=null,$shortcode=null){
 	' <strong>service:</strong><em>' . \aw2_library::get('module.collection.service_id') .'</em>'.
 	' <strong>conn:</strong><em>' . \aw2_library::get('module.collection.connection').'</em>' .
 	'</small>' ;
+	
 	
 	if(!empty($event_keys)){	
 		foreach($event_keys as $key){	
@@ -493,6 +494,7 @@ function collect($atts=null,$content=null,$shortcode=null){
 	if($live_debug==='yes'){
 		$arr['live_debug']= \aw2_library::get('@live_debug');
 	}
+	
 	
 	\aw2\session_cache\hset(['main'=>$ticket_id,'ttl'=>'60','field'=>$count,'value'=>json_encode($arr)],null,null);
 	
