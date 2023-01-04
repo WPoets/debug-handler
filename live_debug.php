@@ -428,8 +428,7 @@ function dump($atts=null,$content=null,$shortcode=null){
 
 \aw2_library::add_service('live_debug.output.collect','collect the events to collect_id',['namespace'=>__NAMESPACE__]);
 function collect($atts=null,$content=null,$shortcode=null){
-	if(!isset($_COOKIE['live_debug'])) return; 
-	
+	//if(!isset($_COOKIE['live_debug'])) return; 
 		
 	extract(\aw2_library::shortcode_atts( array(
 		'event_keys'=>'',
@@ -438,7 +437,7 @@ function collect($atts=null,$content=null,$shortcode=null){
 		'max_events'=>500,
 		'event'=>'',
 		'live_debug'=>'',
-		'collect_id'=>$_COOKIE['live_debug']
+		'collect_id'=>isset($_COOKIE['live_debug'])?$_COOKIE['live_debug']:rand()
 		), $atts, '' ) );
 
 	if(!\aw2\live_debug\is_active()) return;		
