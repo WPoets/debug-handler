@@ -172,9 +172,12 @@ function publish_event($atts=null,$content=null,$shortcode=null){
 	event_set(['event_title'=>$event_title,'message'=>$event]);
 	
 	//check the conditions to see if publishing has started
-	
+	if(publish_is_active()){
+		output_decide();
+		return	;
+	}
+
 	publish_decide();
-	
 	if(!publish_is_active())return;
 	
 	output_decide();
